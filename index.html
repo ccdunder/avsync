@@ -1,0 +1,41 @@
+<body onLoad="init();">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AVSync</title>
+    <meta name="robots" content="noindex" />
+
+    <link rel="stylesheet" href="main.css" />
+    <script type="style" src="./main.css" crossorigin=""></script>
+    <script type="module" src="./wakelock.js" crossorigin=""></script>
+  </head>
+
+  <div id="timedate">
+    <a id="mon">January</a>
+    <a id="d">1</a>, <a id="y">0</a><br />
+    <a id="h">12</a> : <a id="m">00</a>: <a id="s">00</a>:
+    <a id="mi">000</a>
+  </div>
+
+  <div id="mspanel">
+    <a id="miold1">000</a>
+    <a id="miold2">000</a>
+    <a id="miold3">000</a>
+    <a id="miold4">000</a>
+    <a id="miold5">000</a>
+    <a id="miold6">000</a>
+    <a id="miold7">000</a>
+    <a id="miold8">000</a>
+    <a id="miold9">000</a>
+    <a id="miold10">000</a>
+    -- <a id="curr">1</a>
+  </div>
+
+  <div id="offset">
+    <label for="milliseconds">Offset (ms):</label>
+    <input type="number" id="offsetMs" value="0" class="saved" />
+  </div>
+
+  <input type="button" id="toggle" value="Wake Lock" />
+
+  <script src="./main.js" crossorigin=""></script>
+</body>
