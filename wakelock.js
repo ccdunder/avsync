@@ -17,3 +17,10 @@ toggleEl.addEventListener(
   },
   false
 );
+
+// Prevent navigation.
+if (/Mobi|Android/i.test(navigator.userAgent)) {
+  window.onbeforeunload = function() {
+    return "";
+  }
+}

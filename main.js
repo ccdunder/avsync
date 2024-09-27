@@ -9,46 +9,62 @@ function lpad(value, padding) {
     return (zeroes + value).slice(-padding);
 }
 
+// Get the current time, avoiding system clock changes or skew.
+const loadTime = performance.timing.navigationStart;
+function getTime(timestamp) {
+  return /*performance.now()*/ timestamp + loadTime + offsetMs;
+}
+
 // Globals.
 
 const inputField = document.getElementById('offsetMs');
 
 let offsetMs = undefined;
+let prevFrameTs = undefined;
+let prev = 10;
+let curr = 1;
+let frameOffset = null;
 
 // Output.
 
-function updateClock() {
-  var curr = parseInt(document.getElementById("curr").firstChild.nodeValue);
+function updateClock(ts) {
+  if (ts == null) {
+    return;
+  }
+  let time = getTime(ts);
 
-  if (curr==10) curr = 1;
-  else curr += 1; 
-  let now = new Date();
-  // Add offset
-  now.setTime(now.getTime() + offsetMs);
+  const frameNumber = Math.floor((time % 1000) / (1000 / 60)) + 1;
+
+  curr = frameNumber;
+  prev = curr == 1 ? 60 : curr - 1;
+
+  const now = new Date();
+  now.setTime(time);
   
+  console.log(`Frame: ${frameNumber}, Time: ${time % 1000}, ${now.getMilliseconds()}`);
+
   var milli = now.getMilliseconds(),
     sec = now.getSeconds(),
     min = now.getMinutes(),
-    hou = now.getHours(),
-    mo = now.getMonth(),
-    dy = now.getDate(),
-    yr = now.getFullYear();
-  var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  var tags = ["mon", "d", "y", "h", "m", "s", "mi", "curr"],
-    corr = [months[mo], dy, yr, hou.pad(2), min.pad(2), sec.pad(2), milli.pad(3), curr];
+    hou = now.getHours();
+  var tags = ["h", "m", "s", "mi", "curr"],
+    corr = [hou.pad(2), min.pad(2), sec.pad(2), milli.pad(3), curr];
   for (var i = 0; i < tags.length; i++)
     document.getElementById(tags[i]).firstChild.nodeValue = corr[i];
-  document.getElementById("miold" + curr).firstChild.nodeValue = lpad(milli, 3)
+  document.getElementById("miold" + curr).firstChild.nodeValue = lpad(milli, 3);
+  document.getElementById("miold" + curr).style.backgroundColor = "red";
+  document.getElementById("miold" + prev).style.backgroundColor = "";
 }
-window.updateClock = updateClock;
 
-function init() {
-  updateOffset();
-  updateClock();
-  window.setInterval("updateClock()", 1);
+function updateSubframe(ts) {
+  const frameDuration = 1000; // Assuming 60 FPS
+
+  //document.getElementById(`progress-miold${prev}`).value = 0;
+  const progressBarEl = document.getElementById(`progress-bar`);
+  const elapsedTime = ts - prevFrameTs;
+  const progress = Math.min(elapsedTime / frameDuration, 1) * 100;
+  progressBarEl.value = progress;
 }
-window.init = init;
-
 
 // Input.
 
@@ -78,3 +94,13 @@ inputField.addEventListener('input', function() {
 });
 
 
+(function init() {
+  updateOffset();
+  updateClock();
+  function tick(ts) {
+    updateClock(ts);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  //setInterval("updateSubframe(performance.now())", 1);
+})();
